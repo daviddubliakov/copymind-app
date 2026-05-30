@@ -1,15 +1,27 @@
+"use client";
+
+import { createDecisionLog, type DecisionLogFormState } from "@/app/actions/decision-log";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
+import { useActionState } from "react";
+
+const initialState: DecisionLogFormState = {
+  ok: false,
+  error: null,
+  message: null,
+};
 
 export function ChatForm() {
+  const [state, formAction, isPending] = useActionState(createDecisionLog, initialState);
+
   return (
     <Card className="w-full max-w-6xl">
       <CardHeader>
         <CardTitle className="text-2xl">New Decision Log</CardTitle>
       </CardHeader>
       <CardContent>
-        <form className="flex flex-col gap-6">
+        <form className="flex flex-col gap-6" action={formAction}>
           <div className="grid gap-2">
             <Label htmlFor="situation-description">Situation description</Label>
             <textarea
@@ -57,8 +69,11 @@ export function ChatForm() {
             />
           </div>
 
+          {state.error ? <p className="text-sm text-red-500">{state.error}</p> : null}
+          {state.ok && state.message ? <p className="text-sm text-green-600">{state.message}</p> : null}
+
           <Button type="submit" className="w-full sm:w-fit">
-            Submit
+            {isPending ? "Thinking..." : "Submit"}
           </Button>
         </form>
       </CardContent>
