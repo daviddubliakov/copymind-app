@@ -10,6 +10,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { createClient } from "@/lib/supabase/server";
+import { Suspense } from "react";
 
 type AnalysisStatus = "queued" | "processing" | "completed" | "failed";
 
@@ -83,111 +84,113 @@ export default async function DecisionLogByIdPage({
   const analysis = toAnalysisResult(decisionLog.analysis_result);
 
   return (
-    <main className="min-h-screen flex justify-center p-5">
-      <div className="w-full max-w-5xl space-y-6">
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-semibold">Decision log</h1>
-          <Link className="text-sm underline" href="/decision-logs">
-            Back to logs
-          </Link>
-        </div>
+    <Suspense fallback={<div className="p-5">Loading decision log...</div>}>
+      <main className="min-h-screen flex justify-center p-5">
+        <div className="w-full max-w-5xl space-y-6">
+          <div className="flex items-center justify-between">
+            <h1 className="text-2xl font-semibold">Decision log</h1>
+            <Link className="text-sm underline" href="/decision-logs">
+              Back to logs
+            </Link>
+          </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-3">
-              <span>Log details</span>
-              <Badge variant={getStatusVariant(decisionLog.analysis_status)}>
-                {decisionLog.analysis_status}
-              </Badge>
-            </CardTitle>
-            <CardDescription>
-              Created at {new Date(decisionLog.created_at).toLocaleString()}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-5">
-            <section className="space-y-2">
-              <h2 className="font-medium">Situation</h2>
-              <p className="text-sm text-muted-foreground whitespace-pre-wrap">
-                {decisionLog.situation_description}
-              </p>
-            </section>
-
-            <section className="space-y-2">
-              <h2 className="font-medium">Decision made</h2>
-              <p className="text-sm text-muted-foreground whitespace-pre-wrap">
-                {decisionLog.decision_made}
-              </p>
-            </section>
-
-            <section className="space-y-2">
-              <h2 className="font-medium">Expected outcome</h2>
-              <p className="text-sm text-muted-foreground whitespace-pre-wrap">
-                {decisionLog.expected_outcome}
-              </p>
-            </section>
-
-            {decisionLog.own_reasoning ? (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-3">
+                <span>Log details</span>
+                <Badge variant={getStatusVariant(decisionLog.analysis_status)}>
+                  {decisionLog.analysis_status}
+                </Badge>
+              </CardTitle>
+              <CardDescription>
+                Created at {new Date(decisionLog.created_at).toLocaleString()}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-5">
               <section className="space-y-2">
-                <h2 className="font-medium">Own reasoning</h2>
+                <h2 className="font-medium">Situation</h2>
                 <p className="text-sm text-muted-foreground whitespace-pre-wrap">
-                  {decisionLog.own_reasoning}
+                  {decisionLog.situation_description}
                 </p>
               </section>
-            ) : null}
-          </CardContent>
-        </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>AI analysis</CardTitle>
-            <CardDescription>
-              {decisionLog.analysis_completed_at
-                ? `Completed at ${new Date(decisionLog.analysis_completed_at).toLocaleString()}`
-                : "Analysis is still in progress."}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {decisionLog.analysis_error ? (
-              <p className="text-sm text-red-600">{decisionLog.analysis_error}</p>
-            ) : null}
+              <section className="space-y-2">
+                <h2 className="font-medium">Decision made</h2>
+                <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+                  {decisionLog.decision_made}
+                </p>
+              </section>
 
-            {analysis ? (
-              <>
-                {analysis.decision_category ? (
-                  <section className="space-y-2">
-                    <h3 className="font-medium">Decision category</h3>
-                    <p className="text-sm text-muted-foreground">{analysis.decision_category}</p>
-                  </section>
-                ) : null}
+              <section className="space-y-2">
+                <h2 className="font-medium">Expected outcome</h2>
+                <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+                  {decisionLog.expected_outcome}
+                </p>
+              </section>
 
-                {Array.isArray(analysis.cognitive_biases) && analysis.cognitive_biases.length > 0 ? (
-                  <section className="space-y-2">
-                    <h3 className="font-medium">Cognitive biases</h3>
-                    <ul className="list-disc pl-5 text-sm text-muted-foreground space-y-1">
-                      {analysis.cognitive_biases.map((item) => (
-                        <li key={item}>{item}</li>
-                      ))}
-                    </ul>
-                  </section>
-                ) : null}
+              {decisionLog.own_reasoning ? (
+                <section className="space-y-2">
+                  <h2 className="font-medium">Own reasoning</h2>
+                  <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+                    {decisionLog.own_reasoning}
+                  </p>
+                </section>
+              ) : null}
+            </CardContent>
+          </Card>
 
-                {Array.isArray(analysis.missed_alternatives) && analysis.missed_alternatives.length > 0 ? (
-                  <section className="space-y-2">
-                    <h3 className="font-medium">Missed alternatives</h3>
-                    <ul className="list-disc pl-5 text-sm text-muted-foreground space-y-1">
-                      {analysis.missed_alternatives.map((item) => (
-                        <li key={item}>{item}</li>
-                      ))}
-                    </ul>
-                  </section>
-                ) : null}
-              </>
-            ) : (
-              <p className="text-sm text-muted-foreground">No analysis result yet.</p>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-    </main>
+          <Card>
+            <CardHeader>
+              <CardTitle>AI analysis</CardTitle>
+              <CardDescription>
+                {decisionLog.analysis_completed_at
+                  ? `Completed at ${new Date(decisionLog.analysis_completed_at).toLocaleString()}`
+                  : "Analysis is still in progress."}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {decisionLog.analysis_error ? (
+                <p className="text-sm text-red-600">{decisionLog.analysis_error}</p>
+              ) : null}
+
+              {analysis ? (
+                <>
+                  {analysis.decision_category ? (
+                    <section className="space-y-2">
+                      <h3 className="font-medium">Decision category</h3>
+                      <p className="text-sm text-muted-foreground">{analysis.decision_category}</p>
+                    </section>
+                  ) : null}
+
+                  {Array.isArray(analysis.cognitive_biases) && analysis.cognitive_biases.length > 0 ? (
+                    <section className="space-y-2">
+                      <h3 className="font-medium">Cognitive biases</h3>
+                      <ul className="list-disc pl-5 text-sm text-muted-foreground space-y-1">
+                        {analysis.cognitive_biases.map((item) => (
+                          <li key={item}>{item}</li>
+                        ))}
+                      </ul>
+                    </section>
+                  ) : null}
+
+                  {Array.isArray(analysis.missed_alternatives) && analysis.missed_alternatives.length > 0 ? (
+                    <section className="space-y-2">
+                      <h3 className="font-medium">Missed alternatives</h3>
+                      <ul className="list-disc pl-5 text-sm text-muted-foreground space-y-1">
+                        {analysis.missed_alternatives.map((item) => (
+                          <li key={item}>{item}</li>
+                        ))}
+                      </ul>
+                    </section>
+                  ) : null}
+                </>
+              ) : (
+                <p className="text-sm text-muted-foreground">No analysis result yet.</p>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      </main>
+    </Suspense>
   );
 }
