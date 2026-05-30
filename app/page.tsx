@@ -6,6 +6,19 @@ import { ThemeSwitcher } from "@/components/theme-switcher";
 import { hasEnvVars } from "@/lib/utils";
 import Link from "next/link";
 import { Suspense } from "react";
+import { createClient } from "@/lib/supabase/server";
+import { redirect } from "next/navigation";
+
+async function ChatProtected() {
+  const supabase = await createClient();
+  const { data, error } = await supabase.auth.getClaims();
+
+  if (error || !data?.claims) {
+    redirect("/auth/login");
+  }
+
+  return <ChatForm />
+}
 
 export default function Home() {
   return (
@@ -26,7 +39,9 @@ export default function Home() {
           </div>
         </nav>
         <div className="flex-1 w-full flex flex-col gap-20 max-w-7xl p-5">
-          <ChatForm />
+          <Suspense>
+            <ChatProtected />
+          </Suspense>
         </div>
 
         <footer className="w-full border-t border-border/60">
