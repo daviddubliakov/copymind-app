@@ -1,5 +1,6 @@
 import { EnvVarWarning } from "@/components/env-var-warning";
 import { AuthButton } from "@/components/auth-button";
+import { ChatForm } from "@/components/chat-form";
 import { ThemeSwitcher } from "@/components/theme-switcher";
 
 import { hasEnvVars } from "@/lib/utils";
@@ -24,13 +25,22 @@ export default function Home() {
             )}
           </div>
         </nav>
-        <div className="flex-1 flex flex-col gap-20 max-w-5xl p-5">
-          Future Chat Will be here
+        <div className="flex-1 w-full flex flex-col gap-20 max-w-7xl p-5">
+          <ChatForm />
         </div>
 
-        <footer className="w-full flex items-center justify-center border-t mx-auto text-center text-xs gap-8 py-16">
-          Here will be the footer content
-          <ThemeSwitcher />
+        <footer className="w-full border-t border-border/60">
+          <div className="mx-auto flex w-full max-w-7xl flex-col items-center justify-between gap-4 px-5 py-8 text-center sm:flex-row sm:text-left">
+            <div className="space-y-1">
+              <p className="text-sm font-medium text-foreground">
+                Crafted with care
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Done by Davyd Dubliakov
+              </p>
+            </div>
+            <ThemeSwitcher />
+          </div>
         </footer>
       </div>
     </main>
