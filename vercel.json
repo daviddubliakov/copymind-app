@@ -1,0 +1,5 @@
+{
+  "crons": [
+    { "path": "/api/internal/process-decision-logs", "schedule": "*/1 * * * *" }
+  ]
+}
