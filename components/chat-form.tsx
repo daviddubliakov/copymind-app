@@ -10,6 +10,8 @@ const initialState: DecisionLogFormState = {
   ok: false,
   error: null,
   message: null,
+  decisionLogId: null,
+  analysisStatus: null,
 };
 
 export function ChatForm() {
