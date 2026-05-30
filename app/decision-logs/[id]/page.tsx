@@ -153,26 +153,10 @@ export default async function DecisionLogByIdPage({
 
             {analysis ? (
               <>
-                {analysis.summary ? (
-                  <section className="space-y-2">
-                    <h3 className="font-medium">Summary</h3>
-                    <p className="text-sm text-muted-foreground whitespace-pre-wrap">
-                      {analysis.summary}
-                    </p>
-                  </section>
-                ) : null}
-
                 {analysis.decision_category ? (
                   <section className="space-y-2">
                     <h3 className="font-medium">Decision category</h3>
                     <p className="text-sm text-muted-foreground">{analysis.decision_category}</p>
-                  </section>
-                ) : null}
-
-                {typeof analysis.confidence === "number" ? (
-                  <section className="space-y-2">
-                    <h3 className="font-medium">Confidence</h3>
-                    <p className="text-sm text-muted-foreground">{analysis.confidence}</p>
                   </section>
                 ) : null}
 
