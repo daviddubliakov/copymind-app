@@ -4,7 +4,9 @@ import { createDecisionLog, type DecisionLogFormState } from "@/app/actions/deci
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { useActionState } from "react";
+import { redirect } from "next/navigation";
+
+import { useActionState, useEffect } from "react";
 
 const initialState: DecisionLogFormState = {
   ok: false,
@@ -16,6 +18,12 @@ const initialState: DecisionLogFormState = {
 
 export function ChatForm() {
   const [state, formAction, isPending] = useActionState(createDecisionLog, initialState);
+
+  useEffect(() => {
+    if (state.ok && state.decisionLogId) {
+      redirect(`/decision-logs/${state.decisionLogId}`);
+    }
+  }, [state.ok, state.decisionLogId]);
 
   return (
     <Card className="w-full max-w-6xl">
