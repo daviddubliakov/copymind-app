@@ -45,7 +45,7 @@ export function SignUpForm({
         password,
       });
       if (error) throw error;
-      router.push("/decision-logs");
+      router.push("/decision-logs/new");
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "An error occurred");
     } finally {

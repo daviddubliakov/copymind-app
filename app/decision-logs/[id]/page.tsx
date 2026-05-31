@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 
+import { DecisionLogPoller } from "@/components/decision-log-poller";
 import { Badge } from "@/components/ui/badge";
 import {
   Card,
@@ -96,8 +97,9 @@ async function DecisionLogByIdContent({
   const analysis = toAnalysisResult(decisionLog.analysis_result);
 
   return (
-    <main className="min-h-screen flex justify-center p-5">
-      <div className="w-full max-w-5xl space-y-6">
+    <>
+      <DecisionLogPoller analysisStatus={decisionLog.analysis_status} />
+      <div className="mx-auto w-full max-w-5xl space-y-6">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-semibold">Decision log</h1>
           <Link className="text-sm underline" href="/decision-logs">
@@ -201,6 +203,6 @@ async function DecisionLogByIdContent({
           </CardContent>
         </Card>
       </div>
-    </main>
+    </>
   );
 }

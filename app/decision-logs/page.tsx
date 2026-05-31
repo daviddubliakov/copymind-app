@@ -1,63 +1,124 @@
-import { EnvVarWarning } from "@/components/env-var-warning";
-import { AuthButton } from "@/components/auth-button";
-import { ChatForm } from "@/components/chat-form";
-import { ThemeSwitcher } from "@/components/theme-switcher";
-
-import { hasEnvVars } from "@/lib/utils";
 import Link from "next/link";
-import { Suspense } from "react";
-import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import { Suspense } from "react";
 
-async function ChatProtected() {
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { createClient } from "@/lib/supabase/server";
+
+type AnalysisStatus = "queued" | "processing" | "completed" | "failed";
+
+type DecisionLogListRow = {
+  id: string;
+  situation_description: string;
+  decision_made: string;
+  analysis_status: AnalysisStatus;
+  created_at: string;
+};
+
+function getStatusVariant(status: AnalysisStatus) {
+  if (status === "failed") return "destructive";
+  if (status === "completed") return "default";
+  return "secondary";
+}
+
+function shorten(text: string, maxLength: number) {
+  if (text.length <= maxLength) return text;
+  return `${text.slice(0, maxLength).trimEnd()}...`;
+}
+
+export default function DecisionLogsPage() {
+  return (
+    <Suspense fallback={<div className="p-5">Loading decision logs...</div>}>
+      <DecisionLogsContent />
+    </Suspense>
+  );
+}
+
+async function DecisionLogsContent() {
   const supabase = await createClient();
-  const { data, error } = await supabase.auth.getClaims();
+  const { data: userData, error: userError } = await supabase.auth.getUser();
 
-  if (error || !data?.claims) {
+  if (userError || !userData.user) {
     redirect("/auth/login");
   }
 
-  return <ChatForm />
-}
+  const { data, error } = await supabase
+    .from("decision_logs")
+    .select("id, situation_description, decision_made, analysis_status, created_at")
+    .eq("user_id", userData.user.id)
+    .order("created_at", { ascending: false });
 
-export default function DecisionLogs() {
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  const logs = (data ?? []) as DecisionLogListRow[];
+
   return (
-    <main className="min-h-screen flex flex-col items-center">
-      <div className="flex-1 w-full flex flex-col gap-20 items-center">
-        <nav className="w-full flex justify-center border-b border-b-foreground/10 h-16">
-          <div className="w-full max-w-5xl flex justify-between items-center p-3 px-5 text-sm">
-            <div className="flex gap-5 items-center font-semibold">
-              <Link href={"/decision-logs"}>COPYMND test</Link>
-            </div>
-            {!hasEnvVars ? (
-              <EnvVarWarning />
-            ) : (
-              <Suspense>
-                <AuthButton />
-              </Suspense>
-            )}
+    <div className="mx-auto w-full max-w-5xl space-y-6">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="space-y-1">
+            <h1 className="text-2xl font-semibold">Decision logs</h1>
+            <p className="text-sm text-muted-foreground">
+              Review your decisions and their analysis status.
+            </p>
           </div>
-        </nav>
-        <div className="flex-1 w-full flex flex-col gap-20 max-w-7xl p-5">
-          <Suspense>
-            <ChatProtected />
-          </Suspense>
+          <Button asChild>
+            <Link href="/decision-logs/new">Create new log</Link>
+          </Button>
         </div>
 
-        <footer className="w-full border-t border-border/60">
-          <div className="mx-auto flex w-full max-w-7xl flex-col items-center justify-between gap-4 px-5 py-8 text-center sm:flex-row sm:text-left">
-            <div className="space-y-1">
-              <p className="text-sm font-medium text-foreground">
-                Crafted with care
-              </p>
-              <p className="text-xs text-muted-foreground">
-                Done by Davyd Dubliakov
-              </p>
-            </div>
-            <ThemeSwitcher />
+        {logs.length === 0 ? (
+          <Card>
+            <CardHeader>
+              <CardTitle>No decision logs yet</CardTitle>
+              <CardDescription>
+                Start by creating your first decision log.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button asChild variant="outline">
+                <Link href="/decision-logs/new">Go to new log form</Link>
+              </Button>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="space-y-3">
+            {logs.map((log) => (
+              <Link href={`/decision-logs/${log.id}`} key={log.id} className="block">
+                <Card className="transition-colors hover:bg-muted/30">
+                  <CardHeader className="space-y-3">
+                    <div className="flex items-start justify-between gap-3">
+                      <CardTitle className="text-base leading-6">
+                        {shorten(log.situation_description, 150)}
+                      </CardTitle>
+                      <Badge variant={getStatusVariant(log.analysis_status)}>
+                        {log.analysis_status}
+                      </Badge>
+                    </div>
+                    <CardDescription>
+                      {new Date(log.created_at).toLocaleString()}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="pt-0">
+                    <p className="text-sm text-muted-foreground">
+                      <span className="font-medium text-foreground">Decision:</span>{" "}
+                      {shorten(log.decision_made, 160)}
+                    </p>
+                  </CardContent>
+                </Card>
+              </Link>
+            ))}
           </div>
-        </footer>
-      </div>
-    </main>
+        )}
+    </div>
   );
 }
