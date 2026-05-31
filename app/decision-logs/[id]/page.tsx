@@ -1,8 +1,8 @@
-import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { Suspense } from "react";
 
 import { AnalysisStatusBadge } from "@/components/analysis-status-badge";
+import { BackToLogsButton } from "@/components/back-to-logs-button";
 import { DecisionLogDetailSkeleton } from "@/components/decision-log-skeletons";
 import { DecisionLogPoller } from "@/components/decision-log-poller";
 import {
@@ -97,9 +97,7 @@ async function DecisionLogByIdContent({
       <div className="mx-auto w-full max-w-5xl space-y-6">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-semibold">Decision log</h1>
-          <Link className="text-sm underline" href="/decision-logs">
-            Back to logs
-          </Link>
+          <BackToLogsButton />
         </div>
 
         <Card>

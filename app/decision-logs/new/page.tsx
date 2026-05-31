@@ -1,8 +1,10 @@
-import { ChatForm } from "@/components/chat-form";
 import { Suspense } from "react";
-import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+
+import { BackToLogsButton } from "@/components/back-to-logs-button";
+import { ChatForm } from "@/components/chat-form";
 import { NewDecisionLogFormSkeleton } from "@/components/decision-log-skeletons";
+import { createClient } from "@/lib/supabase/server";
 
 async function ChatProtected() {
   const supabase = await createClient();
@@ -17,7 +19,10 @@ async function ChatProtected() {
 
 export default function NewDecisionLogPage() {
   return (
-    <div className="mx-auto w-full max-w-6xl">
+    <div className="mx-auto w-full max-w-6xl space-y-6">
+      <div className="flex items-center justify-end">
+        <BackToLogsButton />
+      </div>
       <Suspense fallback={<NewDecisionLogFormSkeleton />}>
         <ChatProtected />
       </Suspense>
