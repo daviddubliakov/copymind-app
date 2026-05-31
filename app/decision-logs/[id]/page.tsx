@@ -2,9 +2,9 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { Suspense } from "react";
 
+import { AnalysisStatusBadge } from "@/components/analysis-status-badge";
 import { DecisionLogDetailSkeleton } from "@/components/decision-log-skeletons";
 import { DecisionLogPoller } from "@/components/decision-log-poller";
-import { Badge } from "@/components/ui/badge";
 import {
   Card,
   CardContent,
@@ -43,12 +43,6 @@ function toAnalysisResult(value: unknown): AnalysisResult | null {
   }
 
   return value as AnalysisResult;
-}
-
-function getStatusVariant(status: AnalysisStatus) {
-  if (status === "failed") return "destructive";
-  if (status === "completed") return "default";
-  return "secondary";
 }
 
 export default async function DecisionLogByIdPage({
@@ -112,9 +106,7 @@ async function DecisionLogByIdContent({
           <CardHeader>
             <CardTitle className="flex items-center gap-3">
               <span>Log details</span>
-              <Badge variant={getStatusVariant(decisionLog.analysis_status)}>
-                {decisionLog.analysis_status}
-              </Badge>
+              <AnalysisStatusBadge status={decisionLog.analysis_status} />
             </CardTitle>
             <CardDescription>
               Created at {new Date(decisionLog.created_at).toLocaleString()}

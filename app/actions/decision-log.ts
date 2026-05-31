@@ -1,6 +1,8 @@
 "use server";
 
+import { after } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { triggerProcessDecisionLogs } from "@/lib/trigger-process-decision-logs";
 
 export type DecisionLogFormState = {
   ok: boolean;
@@ -49,6 +51,8 @@ export async function createDecisionLog(
       analysisStatus: null,
     };
   }
+
+  after(() => triggerProcessDecisionLogs());
 
   return {
     ok: true,
