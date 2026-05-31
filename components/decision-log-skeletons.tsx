@@ -99,6 +99,51 @@ export function NewDecisionLogFormSkeleton() {
   );
 }
 
+export function DecisionLogsDashboardSkeleton() {
+  return (
+    <div className="mx-auto w-full max-w-5xl space-y-6">
+      <div className="space-y-2">
+        <Skeleton className="h-8 w-40" />
+        <Skeleton className="h-4 w-80 max-w-full" />
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {Array.from({ length: 4 }).map((_, idx) => (
+          <Card key={idx}>
+            <CardHeader className="pb-2">
+              <Skeleton className="h-4 w-28" />
+              <Skeleton className="h-9 w-12" />
+            </CardHeader>
+          </Card>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        {Array.from({ length: 2 }).map((_, idx) => (
+          <Card key={idx}>
+            <CardHeader className="space-y-2">
+              <Skeleton className="h-7 w-44" />
+              <Skeleton className="h-4 w-64 max-w-full" />
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="flex items-center justify-between">
+                <Skeleton className="h-4 w-32" />
+                <Skeleton className="h-4 w-14" />
+              </div>
+              <div className="flex items-center justify-between">
+                <Skeleton className="h-4 w-44" />
+                <Skeleton className="h-4 w-14" />
+              </div>
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-11/12" />
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export function AuthControlsSkeleton() {
   return (
     <div className="flex items-center gap-2">

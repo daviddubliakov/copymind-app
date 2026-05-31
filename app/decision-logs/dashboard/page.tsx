@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { Suspense } from "react";
 
+import { DecisionLogsDashboardSkeleton } from "@/components/decision-log-skeletons";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -49,7 +51,15 @@ function formatPercent(value: number | null) {
   return `${Math.round(value)}%`;
 }
 
-export default async function DecisionLogsDashboardPage() {
+export default function DecisionLogsDashboardPage() {
+  return (
+    <Suspense fallback={<DecisionLogsDashboardSkeleton />}>
+      <DecisionLogsDashboardContent />
+    </Suspense>
+  );
+}
+
+async function DecisionLogsDashboardContent() {
   const supabase = await createClient();
   const { data: userData, error: userError } = await supabase.auth.getUser();
 
