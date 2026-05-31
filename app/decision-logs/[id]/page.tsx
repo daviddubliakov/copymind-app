@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import { Suspense } from "react";
 
+import { DecisionLogDetailSkeleton } from "@/components/decision-log-skeletons";
 import { DecisionLogPoller } from "@/components/decision-log-poller";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -11,7 +13,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { createClient } from "@/lib/supabase/server";
-import { Suspense } from "react";
 
 type AnalysisStatus = "queued" | "processing" | "completed" | "failed";
 
@@ -56,7 +57,7 @@ export default async function DecisionLogByIdPage({
   params: Promise<{ id: string }>;
 }) {
   return (
-    <Suspense fallback={<div className="p-5">Loading decision log...</div>}>
+    <Suspense fallback={<DecisionLogDetailSkeleton />}>
       <DecisionLogByIdContent params={params} />
     </Suspense>
   );

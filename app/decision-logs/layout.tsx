@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Suspense } from "react";
 
+import { AuthControlsSkeleton } from "@/components/decision-log-skeletons";
 import { AuthButton } from "@/components/auth-button";
 import { EnvVarWarning } from "@/components/env-var-warning";
 import { ThemeSwitcher } from "@/components/theme-switcher";
@@ -22,7 +23,7 @@ export default function DecisionLogsLayout({
             {!hasEnvVars ? (
               <EnvVarWarning />
             ) : (
-              <Suspense>
+              <Suspense fallback={<AuthControlsSkeleton />}>
                 <AuthButton />
               </Suspense>
             )}

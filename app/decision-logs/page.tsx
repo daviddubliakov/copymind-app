@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 
+import { DecisionLogsListSkeleton } from "@/components/decision-log-skeletons";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -36,7 +37,7 @@ function shorten(text: string, maxLength: number) {
 
 export default function DecisionLogsPage() {
   return (
-    <Suspense fallback={<div className="p-5">Loading decision logs...</div>}>
+    <Suspense fallback={<DecisionLogsListSkeleton />}>
       <DecisionLogsContent />
     </Suspense>
   );
