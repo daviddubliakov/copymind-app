@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 
+import { DecisionLogPoller } from "@/components/decision-log-poller";
 import { DecisionLogsListSkeleton } from "@/components/decision-log-skeletons";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -62,9 +63,16 @@ async function DecisionLogsContent() {
   }
 
   const logs = (data ?? []) as DecisionLogListRow[];
+  const hasInProgressAnalysis = logs.some(
+    (log) => log.analysis_status === "queued" || log.analysis_status === "processing",
+  );
 
   return (
     <div className="mx-auto w-full max-w-5xl space-y-6">
+        <DecisionLogPoller
+          analysisStatus={hasInProgressAnalysis ? "processing" : "completed"}
+          intervalMs={3000}
+        />
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="space-y-1">
             <h1 className="text-2xl font-semibold">Decision logs</h1>
