@@ -64,7 +64,7 @@ function getCategoryLabel(value: string) {
 export default function DecisionLogsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ category?: string }>;
+  searchParams: Promise<{ category?: string; sort?: string; categories?: string }>;
 }) {
   return (
     <Suspense fallback={<DecisionLogsListSkeleton />}>
@@ -76,7 +76,7 @@ export default function DecisionLogsPage({
 async function DecisionLogsContent({
   searchParams,
 }: {
-  searchParams: Promise<{ category?: string }>;
+  searchParams: Promise<{ category?: string; sort?: string; categories?: string }>;
 }) {
   const supabase = await createClient();
   const { data: userData, error: userError } = await supabase.auth.getUser();
@@ -98,6 +98,8 @@ async function DecisionLogsContent({
   const logs = (data ?? []) as DecisionLogListRow[];
   const resolvedSearchParams = await searchParams;
   const selectedCategoryValue = (resolvedSearchParams.category?.trim() || "all").toLowerCase();
+  const selectedSortValue = (resolvedSearchParams.sort?.trim() || "latest").toLowerCase();
+  const categoriesViewValue = (resolvedSearchParams.categories?.trim() || "").toLowerCase();
 
   const categorySet = new Set<string>();
   for (const log of logs) {
@@ -118,6 +120,8 @@ async function DecisionLogsContent({
   const selectedCategory = categoryOptions.some((option) => option.value.toLowerCase() === selectedCategoryValue)
     ? categoryOptions.find((option) => option.value.toLowerCase() === selectedCategoryValue)?.value ?? "all"
     : "all";
+  const selectedSort = selectedSortValue === "oldest" ? "oldest" : "latest";
+  const isCategoriesExpanded = categoriesViewValue === "expanded";
 
   const filteredLogs = logs.filter((log) => {
     if (selectedCategory === "all") return true;
@@ -125,6 +129,26 @@ async function DecisionLogsContent({
     if (selectedCategory === "uncategorized") return !category;
     return category?.toLowerCase() === selectedCategory.toLowerCase();
   });
+  const sortedFilteredLogs = [...filteredLogs].sort((a, b) => {
+    const aTime = new Date(a.created_at).getTime();
+    const bTime = new Date(b.created_at).getTime();
+    return selectedSort === "oldest" ? aTime - bTime : bTime - aTime;
+  });
+
+  const buildLogsHref = (
+    category: string,
+    sort: "latest" | "oldest",
+    categoriesView: "collapsed" | "expanded" = isCategoriesExpanded ? "expanded" : "collapsed",
+  ) => {
+    const params = new URLSearchParams();
+    if (category !== "all") params.set("category", category);
+    if (sort !== "latest") params.set("sort", sort);
+    if (categoriesView === "expanded") params.set("categories", "expanded");
+    const query = params.toString();
+    return query ? `/decision-logs?${query}` : "/decision-logs";
+  };
+  const visibleCategoryOptions = isCategoriesExpanded ? categoryOptions : categoryOptions.slice(0, 6);
+  const hasHiddenCategories = categoryOptions.length > visibleCategoryOptions.length;
 
   const hasInProgressAnalysis = logs.some(
     (log) => log.analysis_status === "queued" || log.analysis_status === "processing",
@@ -149,19 +173,44 @@ async function DecisionLogsContent({
       </div>
 
       {logs.length > 0 ? (
-        <div className="flex flex-wrap items-center gap-2">
-          {categoryOptions.map((category) => (
-            <Button
-              key={category.value}
-              asChild
-              size="sm"
-              variant={selectedCategory === category.value ? "default" : "outline"}
-            >
-              <Link href={category.value === "all" ? "/decision-logs" : `/decision-logs?category=${encodeURIComponent(category.value)}`}>
-                {category.label}
-              </Link>
+        <div className="space-y-3">
+          <div className="overflow-x-auto pb-2 [scrollbar-gutter:stable]">
+            <div className="flex w-max items-center gap-2 pr-1">
+              {visibleCategoryOptions.map((category) => (
+                <Button
+                  key={category.value}
+                  asChild
+                  size="sm"
+                  className="shrink-0"
+                  variant={selectedCategory === category.value ? "default" : "outline"}
+                >
+                  <Link href={buildLogsHref(category.value, selectedSort)}>{category.label}</Link>
+                </Button>
+              ))}
+              {hasHiddenCategories ? (
+                <Button asChild size="sm" className="shrink-0" variant="ghost">
+                  <Link href={buildLogsHref(selectedCategory, selectedSort, "expanded")}>
+                    Show all
+                  </Link>
+                </Button>
+              ) : null}
+              {isCategoriesExpanded && categoryOptions.length > 6 ? (
+                <Button asChild size="sm" className="shrink-0" variant="ghost">
+                  <Link href={buildLogsHref(selectedCategory, selectedSort, "collapsed")}>
+                    Show less
+                  </Link>
+                </Button>
+              ) : null}
+            </div>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <Button asChild size="sm" variant={selectedSort === "latest" ? "default" : "outline"}>
+              <Link href={buildLogsHref(selectedCategory, "latest")}>Newest first</Link>
             </Button>
-          ))}
+            <Button asChild size="sm" variant={selectedSort === "oldest" ? "default" : "outline"}>
+              <Link href={buildLogsHref(selectedCategory, "oldest")}>Oldest first</Link>
+            </Button>
+          </div>
         </div>
       ) : null}
 
@@ -196,7 +245,7 @@ async function DecisionLogsContent({
         </Card>
       ) : (
         <div className="space-y-3">
-          {filteredLogs.map((log) => (
+          {sortedFilteredLogs.map((log) => (
             <Link href={`/decision-logs/${log.id}`} key={log.id} className="block">
               <Card className="transition-colors hover:bg-muted/30">
                 <CardHeader className="space-y-3">
