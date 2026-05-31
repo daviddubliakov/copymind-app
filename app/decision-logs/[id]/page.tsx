@@ -5,6 +5,7 @@ import { AnalysisStatusBadge } from "@/components/analysis-status-badge";
 import { BackToLogsButton } from "@/components/back-to-logs-button";
 import { DecisionLogDetailSkeleton } from "@/components/decision-log-skeletons";
 import { DecisionLogPoller } from "@/components/decision-log-poller";
+import { ReanalyzeDecisionLogButton } from "@/components/reanalyze-decision-log-button";
 import {
   Card,
   CardContent,
@@ -145,7 +146,13 @@ async function DecisionLogByIdContent({
 
         <Card>
           <CardHeader>
-            <CardTitle>AI analysis</CardTitle>
+            <div className="flex items-start justify-between gap-3">
+              <CardTitle>AI analysis</CardTitle>
+              <ReanalyzeDecisionLogButton
+                decisionLogId={decisionLog.id}
+                analysisStatus={decisionLog.analysis_status}
+              />
+            </div>
             <CardDescription>
               {decisionLog.analysis_completed_at
                 ? `Completed at ${new Date(decisionLog.analysis_completed_at).toLocaleString()}`
