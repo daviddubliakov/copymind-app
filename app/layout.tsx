@@ -9,8 +9,8 @@ const defaultUrl = process.env.VERCEL_URL
 
 export const metadata: Metadata = {
   metadataBase: new URL(defaultUrl),
-  title: "COPYMND",
-  description: "COPYMND application",
+  title: "COPYMIND",
+  description: "COPYMIND application",
 };
 
 const geistSans = Geist({
